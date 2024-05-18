@@ -1,0 +1,37 @@
+name: gh-linkchecker
+description: >-
+  TODO
+branding:
+  icon: link
+  color: green
+inputs:
+  urls:
+    required: true
+    description: >-
+      Space-separated list of URLs to crawl
+  linkcheckerrc:
+    required: false
+    default: ''
+    description: >-
+      Configuration file for LinkChecker
+  retries:
+    required: false
+    default: '1'
+    description: >-
+      Maximum number of retries (default: 1)
+runs:
+  using: composite
+  steps:
+    - name: Install LinkChecker
+      uses: liskin/gh-pipx@v1
+      with:
+        packages: >-
+          'LinkChecker >= 10.4'
+
+    - name: Run LinkChecker
+      env:
+        LINKCHECKERRC: ${{ inputs.linkcheckerrc }}
+        RETRIES: ${{ inputs.retries }}
+      shell: sh
+      run: |
+        $GITHUB_ACTION_PATH/run.sh ${{ inputs.urls }}
