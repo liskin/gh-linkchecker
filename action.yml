@@ -9,16 +9,26 @@ inputs:
     required: false
     description: >-
       Space-separated list of URLs to crawl
+      (default: GitHub Pages URL of the invoking repository)
   linkcheckerrc:
     required: false
     default: ''
     description: >-
       Configuration file for LinkChecker
+  custom-jq-filter:
+    required: false
+    default: '.'
+    description: >-
+      Custom jq filter/program that can be used to implement complex ignore
+      rules that can't be expressed in linkcheckerrc, such as turning warnings
+      into errors or ignoring only temporary redirects but not permanent
+      redirects.
   retries:
     required: false
     default: '1'
     description: >-
-      Maximum number of retries (default: 1)
+      Maximum number of retries
+      (default: 1)
 runs:
   using: composite
   steps:
@@ -42,6 +52,7 @@ runs:
       id: run
       env:
         LINKCHECKERRC: ${{ inputs.linkcheckerrc }}
+        CUSTOM_JQ_FILTER: ${{ inputs.custom-jq-filter }}
         RETRIES: ${{ inputs.retries }}
       shell: sh
       run: |

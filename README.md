@@ -28,6 +28,12 @@ jobs:
 * `linkcheckerrc`
     * Configuration file for LinkChecker
     * (Default: empty)
+* `custom-jq-filter`
+    * Custom jq filter/program that can be used to implement complex ignore
+      rules that can't be expressed in linkcheckerrc, such as turning warnings
+      into errors or ignoring only temporary redirects but not permanent
+      redirects.
+    * (Default: `.`)
 * `retries`
     * Maximum number of retries (if there are any errors)
     * (Default: 1)
