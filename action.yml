@@ -1,6 +1,9 @@
 name: gh-linkchecker
 description: >-
-  TODO
+  Check links using LinkChecker, plus:
+  retry failures,
+  output as GitHub error/warning/notice annotations,
+  custom jq filters
 branding:
   icon: link
   color: green
