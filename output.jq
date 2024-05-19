@@ -1,4 +1,4 @@
-#!/usr/bin/env -S jq -r -f
+include "linkchecker";
 
 # undo linkcheck.logger.sql.sqlify
 def un_sqlify:
@@ -20,7 +20,7 @@ def gh_notice:
 def format_link:
 	[ "\(.parentname | un_sqlify) → \(.urlname | un_sqlify)"
 	, " (\"\(.name | un_sqlify)\")"?
-	] | values | join("\n");
+	] | join("\n");
 
 def format_multiline:
 	gsub("\n"; "\n    ");
@@ -30,9 +30,9 @@ def format_result:
 	, (.result | un_sqlify | format_multiline | "Result: " + .)?
 	, (.warning | un_sqlify | format_multiline | "Warning: " + .)?
 	, (.info | un_sqlify | format_multiline | "Info: " + .)?
-	] | values | join("\n");
+	] | join("\n");
 
 # output in order of severity as GitHub Actions only show the first 10 annotations
-(.[] | select(.valid == 0) | format_result | gh_error),
-(.[] | select(.valid == 1 and .warning) | format_result | gh_warning),
-(.[] | select(.valid == 1 and .info) | format_result | gh_notice)
+(.[] | select(is_error) | format_result | gh_error),
+(.[] | select(is_warning) | format_result | gh_warning),
+(.[] | select(is_info) | format_result | gh_notice)

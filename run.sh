@@ -11,7 +11,8 @@ cd "$tmpdir"
 echo "::endgroup::"
 
 echo "$LINKCHECKERRC" > linkcheckerrc
-echo "$CUSTOM_JQ_FILTER" > filter.jq
+echo 'include "linkchecker";' > filter.jq
+echo "$CUSTOM_JQ_FILTER" >> filter.jq
 
 echo "::group::Find linkchecker's create.sql"
 pip_show=$(pipx runpip LinkChecker show -f LinkChecker)
@@ -43,7 +44,7 @@ for ((try=1; try <= RETRIES; ++try)); do
 	[[ -s "$json" ]] || echo "[]" > "$json"
 
 	# invoke custom filter, if any
-	jq -c -L . -f filter.jq "$json" > result.json
+	jq -c -L "$GITHUB_ACTION_PATH" -f filter.jq "$json" > result.json
 
 	# retry if there are any errors
 	if jq -e 'all(.valid | . != 0)' result.json; then
@@ -57,7 +58,7 @@ for ((try=1; try <= RETRIES; ++try)); do
 done
 
 echo "::group::Results"
-"$GITHUB_ACTION_PATH"/output.jq result.json
+jq -L "$GITHUB_ACTION_PATH" -f "$GITHUB_ACTION_PATH"/output.jq -r result.json
 echo "::endgroup::"
 
 [[ $errors == 0 ]]
