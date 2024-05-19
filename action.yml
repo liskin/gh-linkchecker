@@ -6,7 +6,7 @@ branding:
   color: green
 inputs:
   urls:
-    required: true
+    required: false
     description: >-
       Space-separated list of URLs to crawl
   linkcheckerrc:
@@ -22,6 +22,16 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Get pages URL
+      id: get-url
+      if: inputs.urls == ''
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      shell: sh
+      run: |
+        url=$(gh api --jq .html_url repos/${{ github.repository }}/pages)
+        echo "url=$url" >> $GITHUB_OUTPUT
+
     - name: Install LinkChecker
       uses: liskin/gh-pipx@v1
       with:
@@ -34,4 +44,4 @@ runs:
         RETRIES: ${{ inputs.retries }}
       shell: sh
       run: |
-        $GITHUB_ACTION_PATH/run.sh ${{ inputs.urls }}
+        $GITHUB_ACTION_PATH/run.sh ${{ inputs.urls || steps.get-url.outputs.url }}

@@ -24,7 +24,7 @@ jobs:
 
 * `urls`
     * Space-separated list of URLs to crawl
-    * (Required)
+    * (Default: GitHub Pages URL of the invoking repository)
 * `linkcheckerrc`
     * Configuration file for LinkChecker
     * (Default: empty)
