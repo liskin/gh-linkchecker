@@ -32,7 +32,15 @@ def format_result:
 	, (.info | un_sqlify | format_multiline | "Info: " + .)?
 	] | join("\n");
 
-# output in order of severity as GitHub Actions only show the first 10 annotations
-(.[] | select(is_error) | format_result | gh_error),
-(.[] | select(is_warning) | format_result | gh_warning),
-(.[] | select(is_info) | format_result | gh_notice)
+# NB: GitHub Actions only shows the first 10 annotations of each kind
+sort_by(.parentname, .urlname) |
+.[] |
+if is_error then
+	format_result | gh_error
+elif is_warning then
+	format_result | gh_warning
+elif is_info then
+	format_result | gh_notice
+else
+	error
+end
