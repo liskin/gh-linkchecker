@@ -20,9 +20,18 @@ inputs:
     default: '.'
     description: >-
       Custom jq filter/program that can be used to implement complex ignore
+      rules that can't be expressed in linkcheckerrc.
+      This filter is run after every linkchecker attempt, so using it to
+      upgrade warnings to errors will cause retries.
+  custom-jq-filter-post:
+    required: false
+    default: '.'
+    description: >-
+      Custom jq filter/program that can be used to implement complex ignore
       rules that can't be expressed in linkcheckerrc, such as turning warnings
       into errors or ignoring only temporary redirects but not permanent
       redirects.
+      This filter is run after a successful (no errors) linkchecker attempt.
   retries:
     required: false
     default: '1'
@@ -63,6 +72,7 @@ runs:
       env:
         LINKCHECKERRC: ${{ inputs.linkcheckerrc }}
         CUSTOM_JQ_FILTER: ${{ inputs.custom-jq-filter }}
+        CUSTOM_JQ_FILTER_POST: ${{ inputs.custom-jq-filter-post }}
         RETRIES: ${{ inputs.retries }}
       shell: sh
       run: |

@@ -2,7 +2,7 @@
 
 set -eu -o pipefail
 
-: "${LINKCHECKERRC:?}" "${CUSTOM_JQ_FILTER:?}" "${RETRIES:?}"
+: "${LINKCHECKERRC:?}" "${CUSTOM_JQ_FILTER:?}" "${CUSTOM_JQ_FILTER_POST:?}" "${RETRIES:?}"
 
 echo "::group::Setup temporary directory"
 tmpdir=$(mktemp -d)
@@ -11,8 +11,12 @@ cd "$tmpdir"
 echo "::endgroup::"
 
 echo "$LINKCHECKERRC" > linkcheckerrc
+
 echo 'include "linkchecker";' > filter.jq
 echo "$CUSTOM_JQ_FILTER" >> filter.jq
+
+echo 'include "linkchecker";' > filter-post.jq
+echo "$CUSTOM_JQ_FILTER_POST" >> filter-post.jq
 
 echo "::group::Find linkchecker's create.sql"
 pip_show=$(pipx runpip LinkChecker show -f LinkChecker)
@@ -24,7 +28,6 @@ create_sql_loc="$create_sql_loc1/$create_sql_loc2"
 sed -e '/^drop table /Id' "$create_sql_loc" > create.sql
 echo "::endgroup::"
 
-errors=1
 for ((try=1; try <= RETRIES; ++try)); do
 	echo "::group::Attempt $try"
 
@@ -47,8 +50,7 @@ for ((try=1; try <= RETRIES; ++try)); do
 	jq -c -L "$GITHUB_ACTION_PATH" -f filter.jq "$json" > result.json
 
 	# retry if there are any errors
-	if jq -e 'all(.valid | . != 0)' result.json; then
-		errors=0
+	if jq -e 'all(.valid != 0)' result.json; then
 		break
 	else
 		sleep 30
@@ -57,8 +59,13 @@ for ((try=1; try <= RETRIES; ++try)); do
 	echo "::endgroup::"
 done
 
-echo "::group::Results"
-jq -L "$GITHUB_ACTION_PATH" -f "$GITHUB_ACTION_PATH"/output.jq -r result.json
+echo "::group::Invoking custom post filter"
+# invoke custom filter, if any
+jq -c -L "$GITHUB_ACTION_PATH" -f filter-post.jq result.json > result-post.json
 echo "::endgroup::"
 
-[[ $errors == 0 ]]
+echo "::group::Results"
+jq -L "$GITHUB_ACTION_PATH" -f "$GITHUB_ACTION_PATH"/output.jq -r result-post.json
+echo "::endgroup::"
+
+jq -e 'all(.valid != 0)' result-post.json

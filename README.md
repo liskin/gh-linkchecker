@@ -30,9 +30,16 @@ jobs:
     * (Default: empty)
 * `custom-jq-filter`
     * Custom jq filter/program that can be used to implement complex ignore
+      rules that can't be expressed in linkcheckerrc.
+      This filter is run after every linkchecker attempt, so using it to
+      upgrade warnings to errors will cause retries.
+    * (Default: `.`)
+* `custom-jq-filter-post`
+    * Custom jq filter/program that can be used to implement complex ignore
       rules that can't be expressed in linkcheckerrc, such as turning warnings
       into errors or ignoring only temporary redirects but not permanent
       redirects.
+      This filter is run after a successful (no errors) linkchecker attempt.
     * (Default: `.`)
 * `retries`
     * Maximum number of retries (if there are any errors)
