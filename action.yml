@@ -42,6 +42,16 @@ runs:
         url=$(gh api --jq .html_url repos/${{ github.repository }}/pages)
         echo "url=$url" >> $GITHUB_OUTPUT
 
+    - name: Install latest jq
+      shell: sh
+      run: |
+        echo "::group::Install latest jq"
+        mkdir -p ~/.local/bin
+        wget -O ~/.local/bin/jq https://github.com/jqlang/jq/releases/latest/download/jq-linux-amd64
+        chmod +x ~/.local/bin/jq
+        echo ~/.local/bin >> $GITHUB_PATH
+        echo "::endgroup::"
+
     - name: Install LinkChecker
       uses: liskin/gh-pipx@v1
       with:
