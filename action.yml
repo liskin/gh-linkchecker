@@ -79,6 +79,8 @@ runs:
         $GITHUB_ACTION_PATH/run.sh ${{ inputs.urls || steps.get-url.outputs.url }}
 
     - name: Upload artifacts
+      if: >-
+        !cancelled()
       uses: actions/upload-artifact@v4
       with:
         name: linkchecker
