@@ -19,8 +19,8 @@ def gh_notice:
 
 def format_link:
 	[ "\(.parentname | un_sqlify) → \(.urlname | un_sqlify)"
-	, " (\"\(.name | un_sqlify)\")"?
-	] | join("\n");
+	, "(\"\(.name | un_sqlify)\")"?
+	] | join(" ");
 
 def format_multiline:
 	gsub("\n"; "\n    ");
